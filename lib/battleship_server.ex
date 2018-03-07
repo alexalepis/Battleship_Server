@@ -1,4 +1,2 @@
 defmodule BattleshipServer do
-
-
 end
