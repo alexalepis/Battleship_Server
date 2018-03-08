@@ -9,8 +9,15 @@ defmodule Game.Server do
 
   def init(_) do
     # games : %{ game_id => %{game_pid: nil, game_id: new_game_id, player1: state.wait_list, player2: username, winner: nil}}
+     Node.set_cookie(Node.self, :"test")
+
     state = %Game.Server{wait_list: nil, games: Map.new()}
     {:ok, state}
+  end
+
+  def handle_info({:join, username}, state) do
+    IO.puts "#{username} has joined!"
+    {:noreply, state}
   end
 
   def join_player(username) do
@@ -30,6 +37,11 @@ defmodule Game.Server do
         new_game_pid
     end
   end
+
+  def handle_info({:join, username}) do
+    
+  end
+
 
   def handle_call({:join, username}, _from, state) do
     with true <- is_unique?(state, username) do
