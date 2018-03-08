@@ -24,17 +24,17 @@ defmodule Battle do
   end
 
   def handle_call({:next_move, x, y}, _from, game) do
-    
-    move_result = Game.make_move(game, x, y) |> IO.inspect
-    
+    move_result = Game.make_move(game, x, y) |> IO.inspect()
+
     case move_result do
-      {:error, game, :game_ended}     -> IO.puts " game_ended"
-      {:error, game, :out_of_bounds}  -> IO.puts " out_of_bounds"
-      {:error, game, :already_shot}   -> IO.puts " already_shot"
-      {:ok,    game, :miss}           -> IO.puts " miss"
-      {:ok,    game, :winner_enemy}   -> IO.puts " winner_enemy"
-      {:ok,    game, :no_winner}      -> IO.puts " no_winner"
+      {:error, game, :game_ended} -> IO.puts(" game_ended")
+      {:error, game, :out_of_bounds} -> IO.puts(" out_of_bounds")
+      {:error, game, :already_shot} -> IO.puts(" already_shot")
+      {:ok, game, :miss} -> IO.puts(" miss")
+      {:ok, game, :winner_enemy} -> IO.puts(" winner_enemy")
+      {:ok, game, :no_winner} -> IO.puts(" no_winner")
     end
+
     {:reply, game, game}
   end
 end

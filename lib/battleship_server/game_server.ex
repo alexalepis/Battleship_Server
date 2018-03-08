@@ -58,7 +58,7 @@ defmodule Game.Server do
   def create_new_game(state, username) do
     with new_game_id = :erlang.unique_integer(),
          new_game_data = %{game_id: new_game_id, player1: state.wait_list, player2: username},
-         {:ok, new_game_pid} <- Battle.start_link(new_game_data) do
+         {:ok, new_game_pid} <- Battle.Supervisor.new_game(new_game_data) do
       new_game = %{
         game_pid: new_game_pid,
         game_id: new_game_id,
