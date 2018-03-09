@@ -19,6 +19,7 @@ defmodule Game.Server do
     case is_unique?(state, username) do
       true  ->  check_for_pair( username, client_node, state)
       false ->  Process.send({:client, client_node}, :not_unique, [])
+                IO.puts "Connection denied: not unique username"
     end
   end
 
@@ -26,19 +27,23 @@ defmodule Game.Server do
 
     case Map.get(state, :wait_list) do
       {nil, nil}               ->    Process.send({:client, client_node}, :alone, [])
+                                      IO.puts "#{username} connected successfully"
                                     %{state | wait_list: {username, client_node}}
+                                    
 
-      {_, first_client_node}   ->   {:ok, new_game_pid, state}  = create_new_game(state, {username, client_node})
+      {first_client_username, first_client_node}   ->   {:ok, new_game_pid, state}  = create_new_game(state, {username, client_node})
+                                                        IO.puts "#{username} connected successfully"
+                                                        Process.send({:client, first_client_node}, {:game_created, new_game_pid}, [])
+                                                        Process.send({:client, client_node}, {:game_created, new_game_pid}, [])
 
-                                    Process.send({:client, first_client_node}, {:game_created, new_game_pid}, [])
-                                    Process.send({:client, client_node}, {:game_created, new_game_pid}, [])
-                                   state
+                                                        IO.puts "#{username} is playing with #{first_client_username} at the battle with ID: #{inspect new_game_pid}"
+                                                        state
     end
   end
 
 
   def handle_info({:join_game, username, client_node, client_pid},  state) do
-    IO.puts "#{username} has joined!"
+    IO.puts "#{username} from #{client_node} is trying to connect!"
     state = join_player(username, client_node, state)
     {:noreply, state}
   end
@@ -99,8 +104,7 @@ defmodule Game.Server do
         winner: nil
       }
 
-      {"bef",state} |> IO.inspect
-      state = %{state | wait_list: {nil, nil}, games: Map.put(state.games, new_game_id, new_game)} |> IO.inspect
+      state = %{state | wait_list: {nil, nil}, games: Map.put(state.games, new_game_id, new_game)}
       {:ok, new_game_pid, state}
     end
   end
