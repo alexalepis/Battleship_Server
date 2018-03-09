@@ -7,15 +7,15 @@ defmodule Battle do
 
   def init(game_data = %{game_id: new_game_id, player1: pl1, player2: pl2}) do
   data = data_init(game_data)
-    {:ok, data} 
+    {:ok, data}
   end
 
-  def data_init(%{game_id: new_game_id, player1: pl1, player2: pl2}) do
-  
+  def data_init(%{game_id: new_game_id, player1: {pl1, pl1_node}, player2: {pl2, pl2_node}}) do
+
      game =
       Game.new(new_game_id, Game.Settings.new())
-      |> Game.add_player(1, pl1)
-      |> Game.add_player(1, pl2)
+      |> Game.add_player(pl1_node, pl1)
+      |> Game.add_player(pl2_node, pl2)
 
       player1 = Player.place_random(game.current_player)
       player2 = Player.place_random(game.enemy_player)
@@ -40,4 +40,13 @@ defmodule Battle do
 
     {:reply, new_game, new_game}
   end
+
+  def handle_info({:make_move, x, y},  state) do
+    IO.puts " next move #{x} #{y}: game_data #{state.game_id}"
+    Process.send({:client, state.current_player.id}, {:move_completed, x, y},[] )
+    Process.send({:client, state.enemy_player.id}, {:move_completed, x, y},[] )
+
+    {:noreply, state}
+  end
+
 end
