@@ -15,16 +15,17 @@ defmodule Game.Server do
     {:ok, state}
   end
 
-  def handle_info({:join, username}, state) do
+  def handle_info({:join_game, username,client_node, client_pid}, state) do
     IO.puts "#{username} has joined!"
+    GenServer.cast(client_pid, :wait)
+    #join_player(username, client_node, client_pid)
     {:noreply, state}
   end
 
-  def join_player(username) do
-    # GenServer.call(:game_server, {:join, username})
+  def join_player(username, node, client_pid) do
     case GenServer.call(:game_server, {:join, username}) do
-      :alone ->
-        IO.puts("waiting for other player")
+       :alone -> Process.send(client_pid , :wait, [])
+        IO.puts("#{username} is waiting for other player")
 
       :not_unique ->
         IO.puts("username: #{username} already exists ")
@@ -36,10 +37,6 @@ defmodule Game.Server do
         IO.puts("game created")
         new_game_pid
     end
-  end
-
-  def handle_info({:join, username}) do
-    
   end
 
 
