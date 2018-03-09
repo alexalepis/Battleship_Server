@@ -9,29 +9,31 @@ defmodule Game.Server do
 
   def init(_) do
     # games : %{ game_id => %{game_pid: nil, game_id: new_game_id, player1: state.wait_list, player2: username, winner: nil}}
-     Node.set_cookie(Node.self, :"test")
-
-    state = %Game.Server{wait_list: {nil, nil}, games: Map.new()}
+      Node.set_cookie(Node.self, :"test")
+      state = %Game.Server{wait_list: {nil, nil}, games: Map.new()}
     {:ok, state}
   end
 
 
   def join_player(username, client_node, state) do
-
-    if is_unique?(state, username) do
-      case Map.get(state, :wait_list) do
-        {nil, nil}                      ->    Process.send({:client, client_node}, :alone, [])
-                                                  %{state | wait_list: {username, client_node}}
-        {_, first_client_node}   ->    {:ok, new_game_pid, state}  = create_new_game(state, {username, client_node})
-                                                    Process.send({:client, first_client_node}, {:game_created, new_game_pid}, [])
-                                                    Process.send({:client, client_node}, {:game_created, new_game_pid}, [])
-                                                  state
-      end
-
-    else
-      Process.send({:client, client_node}, :not_unique, [])
+    case is_unique?(state, username) do
+      true  ->  check_for_pair( username, client_node, state)
+      false ->  Process.send({:client, client_node}, :not_unique, [])
     end
+  end
 
+  def check_for_pair( username, client_node, state)  do
+
+    case Map.get(state, :wait_list) do
+      {nil, nil}               ->    Process.send({:client, client_node}, :alone, [])
+                                    %{state | wait_list: {username, client_node}}
+
+      {_, first_client_node}   ->   {:ok, new_game_pid, state}  = create_new_game(state, {username, client_node})
+
+                                    Process.send({:client, first_client_node}, {:game_created, new_game_pid}, [])
+                                    Process.send({:client, client_node}, {:game_created, new_game_pid}, [])
+                                   state
+    end
   end
 
 
@@ -72,8 +74,6 @@ defmodule Game.Server do
 
   def is_unique?(state, username) do
 
-    state |> IO.inspect
-    username |> IO.inspect
     unique_at_games =
       Enum.any?(state.games, fn {_, value} ->
         Map.get(value, :player1) == username or Map.get(value, :player2) == username
@@ -99,7 +99,8 @@ defmodule Game.Server do
         winner: nil
       }
 
-      state = %{state | wait_list: {nil, nil}, games: Map.put(state.games, new_game_id, new_game)}
+      {"bef",state} |> IO.inspect
+      state = %{state | wait_list: {nil, nil}, games: Map.put(state.games, new_game_id, new_game)} |> IO.inspect
       {:ok, new_game_pid, state}
     end
   end

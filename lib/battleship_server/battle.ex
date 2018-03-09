@@ -6,7 +6,7 @@ defmodule Battle do
   end
 
   def init(game_data = %{game_id: new_game_id, player1: pl1, player2: pl2}) do
-  data = data_init(game_data)
+    data = data_init(game_data)
     {:ok, data}
   end
 
