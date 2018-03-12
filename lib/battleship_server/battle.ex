@@ -52,8 +52,8 @@ defmodule Battle do
                                 Process.send({:client, game.enemy_player.id}, :your_turn, [])
       {:ok, new_game, :winner} -> Process.send({:client, game.current_player.id}, {message, game.enemy_player.name}, [])
                                   Process.send({:client, game.enemy_player.id}, {message, game.enemy_player.name}, [])
-      {:ok, new_game, :hit} -> Process.send({:client, game.current_player.id}, {message, game.enemy_player.name}, [])
-                               Process.send({:client, game.enemy_player.id}, {message, game.enemy_player.name}, [])
+      {:ok, new_game, :hit} -> Process.send({:client, game.current_player.id}, {message, game.current_player.name}, [])
+                               Process.send({:client, game.enemy_player.id}, {message, game.current_player.name}, [])
                                Process.send({:client, game.enemy_player.id}, :your_turn, [])
     end
 
