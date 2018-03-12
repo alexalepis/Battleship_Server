@@ -5,7 +5,7 @@ defmodule Battle do
     GenServer.start_link(__MODULE__, game_data)
   end
 
-  def init(game_data = %{game_id: new_game_id, player1: pl1, player2: pl2}) do
+  def init(game_data) do
     data = data_init(game_data)
     {:ok, data}
   end
@@ -20,7 +20,12 @@ defmodule Battle do
       player1 = Player.place_random(game.current_player)
       player2 = Player.place_random(game.enemy_player)
 
-      game = %{game | current_player: player1, enemy_player: player2}
+      player1 |> IO.inspect
+      player2 |> IO.inspect
+      Server.Protocol.send_to(player1.id, {:init_data, player1.my_board})
+      Server.Protocol.send_to(player2.id, {:init_data, player2.my_board})
+
+      %{game | current_player: player1, enemy_player: player2}
   end
 
   # def next_move(battle, x, y) do
@@ -44,35 +49,29 @@ defmodule Battle do
   def next_move(game, x, y) do
     {status, new_game, message} = Game.make_move(game, x, y)
     case {status, new_game, message} do
-      {:error, new_game, :game_ended} -> Process.send({:client, game.current_player.id}, message, [])
-                                         Process.send({:client, game.enemy_player.id}, message, [])
-      {:error, new_game, :out_of_bounds} -> Process.send({:client, game.current_player.id}, message, [])
-      {:error, new_game, :already_shot} -> Process.send({:client, game.current_player.id}, message, [])
-      {:ok, new_game, :miss} -> Process.send({:client, game.current_player.id}, message, [])
-                                Process.send({:client, game.enemy_player.id}, :your_turn, [])
-      {:ok, new_game, :winner} -> Process.send({:client, game.current_player.id}, {message, game.enemy_player.name}, [])
-                                  Process.send({:client, game.enemy_player.id}, {message, game.enemy_player.name}, [])
-      {:ok, new_game, :hit} -> Process.send({:client, game.current_player.id}, {message, game.current_player.name}, [])
-                               Process.send({:client, game.enemy_player.id}, {message, game.current_player.name}, [])
-                               Process.send({:client, game.enemy_player.id}, :your_turn, [])
+      {:error, _, :game_ended}    -> Server.Protocol.send_to(game.current_player.id, game.enemy_player.id, message)
+      {:error, _, :out_of_bounds} -> Server.Protocol.send_to(game.current_player.id, message)
+      {:error, _, :already_shot}  -> Server.Protocol.send_to(game.current_player.id, message)
+      {:ok, _, :miss}             -> Server.Protocol.send_to(game.current_player.id, message)
+                                     Server.Protocol.send_to(game.enemy_player.id, :your_turn)
+      {:ok, _, :winner}           -> Server.Protocol.send_to(game.current_player.id, game.enemy_player.id, {message, game.enemy_player.name})
+      {:ok, _, :hit}              -> Server.Protocol.send_to(game.current_player.id, game.enemy_player.id, {message, game.current_player.name})
+                                     Server.Protocol.send_to(game.enemy_player.id, :your_turn)
+
     end
 
     new_game
-  
+
   end
 
 
 
   def handle_info({:make_move, x, y, caller_id},  state) do
 
-
     case state.current_player.id == caller_id do
       true -> state = next_move(state, x, y)
-      false -> Process.send({:client, caller_id}, :not_your_turn,[] )
+      false -> Server.Protocol.send_to(caller_id, :not_your_turn)
     end
-    # IO.puts " next move #{x} #{y}: game_data #{state.game_id}"
-    # Process.send({:client, state.current_player.id}, {:move_completed, x, y},[] )
-    # Process.send({:client, state.enemy_player.id}, {:move_completed, x, y},[] )
 
     {:noreply, state}
   end

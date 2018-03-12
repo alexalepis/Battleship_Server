@@ -15,36 +15,34 @@ defmodule Game.Server do
   end
 
 
-  def join_player(username, client_node, state) do
+  def join_player(username, client_pid, state) do
     case is_unique?(state, username) do
-      true  ->  check_for_pair( username, client_node, state)
-      false ->  Process.send({:client, client_node}, :not_unique, [])
+      true  ->  check_for_pair( username, client_pid, state)
+      false ->  Process.send(client_pid, :not_unique, [])
                 IO.puts "Connection denied: not unique username"
     end
   end
 
-  def check_for_pair( username, client_node, state)  do
+  def check_for_pair( username, client_pid, state)  do
 
     case Map.get(state, :wait_list) do
-      {nil, nil}               ->    Process.send({:client, client_node}, :alone, [])
-                                      IO.puts "#{username} connected successfully"
-                                    %{state | wait_list: {username, client_node}}
-                                    
-
-      {first_client_username, first_client_node}   ->   {:ok, new_game_pid, state}  = create_new_game(state, {username, client_node})
+      {nil, nil}                                  ->    Server.Protocol.send_to(client_pid, :alone)
                                                         IO.puts "#{username} connected successfully"
-                                                        Process.send({:client, first_client_node}, {:game_created, new_game_pid}, [])
-                                                        Process.send({:client, client_node}, {:game_created, new_game_pid}, [])
+                                                        %{state | wait_list: {username, client_pid}}
 
+
+      {first_client_username, first_client_pid}   ->   {:ok, new_game_pid, state}  = create_new_game(state, {username, client_pid})
+                                                        IO.puts "#{username} connected successfully"
+                                                        Server.Protocol.send_to(first_client_pid, client_pid, {:game_created, new_game_pid})
                                                         IO.puts "#{username} is playing with #{first_client_username} at the battle with ID: #{inspect new_game_pid}"
                                                         state
     end
   end
 
-
   def handle_info({:join_game, username, client_node, client_pid},  state) do
-    IO.puts "#{username} from #{client_node} is trying to connect!"
-    state = join_player(username, client_node, state)
+    IO.puts "#{username} from client_node: #{client_node} , client_pid: #{inspect client_pid} , self() #{inspect self()} is trying to connect!"
+    Process.send(client_pid, "HAHAHAHA", [])
+    state = join_player(username, client_pid, state)
     {:noreply, state}
   end
 
