@@ -18,12 +18,12 @@ defmodule Game.Server do
   def join_player(username, client_pid, state) do
     case is_unique?(state, username) do
       true  ->  check_for_pair( username, client_pid, state)
-      false ->  Process.send(client_pid, :not_unique, [])
+      false ->  Server.Protocol.send_to(client_pid, :not_unique)
                 IO.puts "Connection denied: not unique username"
     end
   end
 
-  def check_for_pair( username, client_pid, state)  do
+  def check_for_pair(username, client_pid, state)  do
 
     case Map.get(state, :wait_list) do
       {nil, nil}                                  ->    Server.Protocol.send_to(client_pid, :alone)
@@ -41,7 +41,6 @@ defmodule Game.Server do
 
   def handle_info({:join_game, username, client_node, client_pid},  state) do
     IO.puts "#{username} from client_node: #{client_node} , client_pid: #{inspect client_pid} , self() #{inspect self()} is trying to connect!"
-    Process.send(client_pid, "HAHAHAHA", [])
     state = join_player(username, client_pid, state)
     {:noreply, state}
   end

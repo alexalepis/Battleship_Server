@@ -20,8 +20,6 @@ defmodule Battle do
       player1 = Player.place_random(game.current_player)
       player2 = Player.place_random(game.enemy_player)
 
-      player1 |> IO.inspect
-      player2 |> IO.inspect
       Server.Protocol.send_to(player1.id, {:init_data, player1.my_board})
       Server.Protocol.send_to(player2.id, {:init_data, player2.my_board})
 
@@ -49,14 +47,18 @@ defmodule Battle do
   def next_move(game, x, y) do
     {status, new_game, message} = Game.make_move(game, x, y)
     case {status, new_game, message} do
-      {:error, _, :game_ended}    -> Server.Protocol.send_to(game.current_player.id, game.enemy_player.id, message)
-      {:error, _, :out_of_bounds} -> Server.Protocol.send_to(game.current_player.id, message)
-      {:error, _, :already_shot}  -> Server.Protocol.send_to(game.current_player.id, message)
-      {:ok, _, :miss}             -> Server.Protocol.send_to(game.current_player.id, message)
-                                     Server.Protocol.send_to(game.enemy_player.id, :your_turn)
-      {:ok, _, :winner}           -> Server.Protocol.send_to(game.current_player.id, game.enemy_player.id, {message, game.enemy_player.name})
-      {:ok, _, :hit}              -> Server.Protocol.send_to(game.current_player.id, game.enemy_player.id, {message, game.current_player.name})
-                                     Server.Protocol.send_to(game.enemy_player.id, :your_turn)
+      {:error, _, :game_ended}    ->  Server.Protocol.send_to(new_game.current_player.id, new_game.enemy_player.id, message)
+      {:error, _, :out_of_bounds} ->  Server.Protocol.send_to(new_game.current_player.id, message)
+      {:error, _, :already_shot}  ->  Server.Protocol.send_to(new_game.current_player.id, message)
+      {:ok, _, :winner}           ->  Server.Protocol.send_to(new_game.current_player.id, new_game.enemy_player.id, {message, new_game.enemy_player.name})
+      {:ok, _, :hit}              ->  new_game |> IO.inspect
+                                      Server.Protocol.send_to(new_game.enemy_player.id, {message, new_game.enemy_player.name, new_game.enemy_player.shot_board})
+                                      Server.Protocol.send_to(new_game.current_player.id, {message, new_game.enemy_player.name, new_game.current_player.my_board})
+                                      Server.Protocol.send_to(new_game.current_player.id, :your_turn)
+      {:ok, _, :miss}             ->  new_game |> IO.inspect
+                                      Server.Protocol.send_to(new_game.enemy_player.id, {message, new_game.enemy_player.name, new_game.enemy_player.shot_board})
+                                      Server.Protocol.send_to(new_game.current_player.id, {message, new_game.enemy_player.name, new_game.current_player.my_board})
+                                      Server.Protocol.send_to(new_game.current_player.id, :your_turn)
 
     end
 
