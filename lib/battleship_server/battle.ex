@@ -26,24 +26,6 @@ defmodule Battle do
       %{game | current_player: player1, enemy_player: player2}
   end
 
-  # def next_move(battle, x, y) do
-  #   GenServer.call(battle, {:next_move, x, y})
-  # end
-
-  # def handle_call({:next_move, x, y}, _from, game) do
-  #   {status, new_game, message} = Game.make_move(game, x, y)
-  #   case {status, new_game, message} do
-  #     {:error, new_game, :game_ended} -> IO.puts(" game_ended")
-  #     {:error, new_game, :out_of_bounds} -> IO.puts(" out_of_bounds")
-  #     {:error, new_game, :already_shot} -> IO.puts(" already_shot")
-  #     {:ok, new_game, :miss} -> IO.puts(" miss")
-  #     {:ok, new_game, :winner_enemy} -> IO.puts(" winner_enemy")
-  #     {:ok, new_game, :no_winner} -> IO.puts(" no_winner")
-  #   end
-
-  #   {:reply, new_game, new_game}
-  # end
-
   def next_move(game, x, y) do
     {status, new_game, message} = Game.make_move(game, x, y)
     case {status, new_game, message} do
@@ -51,13 +33,14 @@ defmodule Battle do
       {:error, _, :out_of_bounds} ->  Server.Protocol.send_to(new_game.current_player.id, message)
       {:error, _, :already_shot}  ->  Server.Protocol.send_to(new_game.current_player.id, message)
       {:ok, _, :winner}           ->  Server.Protocol.send_to(new_game.current_player.id, new_game.enemy_player.id, {message, new_game.enemy_player.name})
-      {:ok, _, :hit}              ->  new_game |> IO.inspect
-                                      Server.Protocol.send_to(new_game.enemy_player.id, {message, new_game.enemy_player.name, new_game.enemy_player.shot_board})
+      {:ok, _, :hit}              ->  Server.Protocol.send_to(new_game.enemy_player.id, {message, new_game.enemy_player.name, new_game.enemy_player.shot_board})
                                       Server.Protocol.send_to(new_game.current_player.id, {message, new_game.enemy_player.name, new_game.current_player.my_board})
                                       Server.Protocol.send_to(new_game.current_player.id, :your_turn)
-      {:ok, _, :miss}             ->  new_game |> IO.inspect
+
+      {:ok, _, :miss}             ->  merged_map = Map.merge(new_game.current_player.my_board.map, new_game.enemy_player.shot_board.map)
+                                      merged_board = %Board{map: merged_map, n: new_game.current_player.my_board.n}
                                       Server.Protocol.send_to(new_game.enemy_player.id, {message, new_game.enemy_player.name, new_game.enemy_player.shot_board})
-                                      Server.Protocol.send_to(new_game.current_player.id, {message, new_game.enemy_player.name, new_game.current_player.my_board})
+                                      Server.Protocol.send_to(new_game.current_player.id, {message, new_game.enemy_player.name, merged_board})
                                       Server.Protocol.send_to(new_game.current_player.id, :your_turn)
 
     end

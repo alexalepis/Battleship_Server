@@ -40,39 +40,10 @@ defmodule Game.Server do
   end
 
   def handle_info({:join_game, username, client_node, client_pid},  state) do
-    IO.puts "#{username} from client_node: #{client_node} , client_pid: #{inspect client_pid} , self() #{inspect self()} is trying to connect!"
+    IO.puts "#{username} from client_pid: #{inspect client_pid}} is trying to connect!"
     state = join_player(username, client_pid, state)
     {:noreply, state}
   end
-
-
-  # def join_player(username, client_node, client_pid) do
-  #   case GenServer.call(:game_server, {:join, username}, 50000000) do
-  #      :alone -> Process.send({:client, client_node}, :alone, [])
-  #       #IO.puts("#{username} is waiting for other player")
-
-  #     :not_unique ->  Process.send({:client, client_node}, :not_unique, [])
-  #       #IO.puts("username: #{username} already exists ")
-
-  #     :error_new_game ->  Process.send({:client, client_node}, :error, [])
-  #       #IO.puts("error at game creation")
-
-  #     {:ok, new_game_pid} -> Process.send({:client, client_node}, {:game_created, new_game_pid}, [])
-  #       #IO.puts("game created")
-  #       #new_game_pid
-
-  #   end
-  # end
-  # def handle_call({:join, username}, _from, state) do
-  #   with true <- is_unique?(state, username) do
-  #     case Map.get(state, :wait_list) do
-  #       nil -> {:reply, :alone, %{state | wait_list: username}}
-  #       _ -> create_new_game(state, username)
-  #     end
-  #   else
-  #     false -> {:reply, :not_unique, state}
-  #   end
-  # end
 
   def is_unique?(state, username) do
 
