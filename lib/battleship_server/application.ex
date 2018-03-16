@@ -8,8 +8,9 @@ defmodule BattleshipServer.Application do
   def start(_type, _args) do
     # List all child processes to be supervised
     children = [
-     Server.Supervisor,
-     Battle.Supervisor
+      BattleshipServer.Repo,
+      Server.Supervisor,
+      Battle.Supervisor
     ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html

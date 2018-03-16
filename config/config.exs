@@ -2,6 +2,18 @@
 # and its dependencies with the aid of the Mix.Config module.
 use Mix.Config
 
+config :battleship_server, BattleshipServer.Repo,
+  adapter: Tds.Ecto,
+  hostname: "localhost",
+  username: "testelixir",
+  password: "vPA3dOgXH5Jy6ThF1ObM",
+  database: "BattleshipsDB",  
+  port: 1433,
+  instance: nil,
+  pool_size: 10
+
+config :battleship_server, ecto_repos: [BattleshipServer.Repo]
+
 # This configuration is loaded before any dependency and is restricted
 # to this project. If another project depends on this project, this
 # file won't be loaded nor affect the parent project. For this reason,

@@ -33,6 +33,7 @@ defmodule Battle do
       {:error, _, :out_of_bounds} ->  Server.Protocol.send_to(new_game.current_player.id, message)
       {:error, _, :already_shot}  ->  Server.Protocol.send_to(new_game.current_player.id, message)
       {:ok, _, :winner}           ->  Server.Protocol.send_to(new_game.current_player.id, new_game.enemy_player.id, {message, new_game.enemy_player.name})
+                                      BattleshipServer.Store.winner(new_game.game_id, to_charlist(elem(new_game.enemy_player.name, 0)))
       {:ok, _, :hit}              ->  Server.Protocol.send_to(new_game.enemy_player.id, {message, new_game.enemy_player.name, new_game.enemy_player.shot_board})
                                       Server.Protocol.send_to(new_game.current_player.id, {message, new_game.enemy_player.name, new_game.current_player.my_board})
                                       Server.Protocol.send_to(new_game.current_player.id, :your_turn)
