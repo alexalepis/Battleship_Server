@@ -72,9 +72,9 @@ defmodule Game.Server do
         winner: nil
       }
 
-     
 
-      BattleshipServer.Store.new_game(new_game_id, to_charlist(elem(state.wait_list, 0)), to_charlist(elem(client_data, 0)))
+
+      BattleshipServer.Store.new_game(new_game_id, elem(state.wait_list, 0), elem(client_data, 0))
 
       state = %{state | wait_list: {nil, nil}, games: Map.put(state.games, new_game_id, new_game)}
       {:ok, new_game_pid, state}

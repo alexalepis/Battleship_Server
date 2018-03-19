@@ -3,9 +3,9 @@ defmodule Battleshipserver.Db.Game do
 
   schema "game" do
     field :game_id, :integer
-    field :player1_username, Tds.VarChar
-    field :player2_username, Tds.VarChar
-    field :winner, Tds.VarChar
+    field :player1_username, :string
+    field :player2_username, :string
+    field :winner, :string
     field :start_date, :utc_datetime
     field :end_date, :utc_datetime
   end
