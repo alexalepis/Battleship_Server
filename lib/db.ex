@@ -6,5 +6,7 @@ defmodule Battleshipserver.Db.Game do
     field :player1_username, Tds.VarChar
     field :player2_username, Tds.VarChar
     field :winner, Tds.VarChar
+    field :start_date, :utc_datetime
+    field :end_date, :utc_datetime
   end
 end

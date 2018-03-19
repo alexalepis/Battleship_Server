@@ -72,8 +72,7 @@ defmodule Game.Server do
         winner: nil
       }
 
-      # %BattleshipServer.Repo{game_id: new_game_id, player1_username: elem(state.wait_list, 0), player2_username: elem(client_data, 0), winner: null}
-      # |> BattleshipServer.Repo.insert
+     
 
       BattleshipServer.Store.new_game(new_game_id, to_charlist(elem(state.wait_list, 0)), to_charlist(elem(client_data, 0)))
 
