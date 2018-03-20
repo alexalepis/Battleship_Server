@@ -8,7 +8,9 @@ use Supervisor
     def init(_) do
 
     children = [
-        Game.Server
+        Game.Server,
+        BattleshipServer.Registry,
+        BattleshipServer.Store
     ]
     opts = [strategy: :one_for_one]
 

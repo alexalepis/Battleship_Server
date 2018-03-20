@@ -1,6 +1,30 @@
 defmodule BattleshipServer.Store do
+  use GenServer
 
- def new_game(new_game_id, pl1, pl2) do
+  def start_link(_) do
+    GenServer.start_link(__MODULE__, nil)
+  end
+
+  def init(_) do
+
+
+    {:ok, _} = BattleshipServer.Registry.register("game_start_stop")
+
+    {:ok, nil}
+  end
+
+def handle_info({:game_created, new_game_id, pl1, pl2}, _state) do
+  new_game(new_game_id, pl1, pl2)
+  {:noreply, nil}
+end
+
+def handle_info({:game_ended_with_winner, game_id, winner_username}, _state) do
+  winner(game_id, winner_username)
+  {:noreply, nil}
+end
+
+
+  def new_game(new_game_id, pl1, pl2) do
     %Battleshipserver.Db.Game{ game_id: new_game_id,
                                 player1_username: pl1,
                                 player2_username: pl2,

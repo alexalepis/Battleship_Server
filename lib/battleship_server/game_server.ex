@@ -9,8 +9,11 @@ defmodule Game.Server do
 
   def init(_) do
     # games : %{ game_id => %{game_pid: nil, game_id: new_game_id, player1: state.wait_list, player2: username, winner: nil}}
-      Node.set_cookie(Node.self, :"test")
-      state = %Game.Server{wait_list: {nil, nil}, games: Map.new()}
+    Node.set_cookie(Node.self, :"test")
+    state = %Game.Server{wait_list: {nil, nil}, games: Map.new()}
+
+    
+
     {:ok, state}
   end
 
@@ -73,8 +76,7 @@ defmodule Game.Server do
       }
 
 
-
-      BattleshipServer.Store.new_game(new_game_id, elem(state.wait_list, 0), elem(client_data, 0))
+      BattleshipServer.Registry.dispatch("game_start_stop",  {:game_created, new_game_id, elem(state.wait_list, 0), elem(client_data, 0)})
 
       state = %{state | wait_list: {nil, nil}, games: Map.put(state.games, new_game_id, new_game)}
       {:ok, new_game_pid, state}
