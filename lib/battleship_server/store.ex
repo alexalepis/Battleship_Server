@@ -30,6 +30,7 @@ end
                                 player2_username: pl2,
                                 start_date: DateTime.utc_now()
     }
+    |>Battleshipserver.Db.Game.changeset
     |>BattleshipServer.Repo.insert!
 
     # query = "INSERT INTO game VALUES (#{new_game_id},'#{pl1}', '#{pl2}', null, '#{DateTime.utc_now()}', null)"
