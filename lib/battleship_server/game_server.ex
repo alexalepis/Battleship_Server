@@ -8,12 +8,8 @@ defmodule Game.Server do
   end
 
   def init(_) do
-    # games : %{ game_id => %{game_pid: nil, game_id: new_game_id, player1: state.wait_list, player2: username, winner: nil}}
-    Node.set_cookie(Node.self, :"test")
+    # Node.set_cookie(Node.self, :"test")
     state = %Game.Server{wait_list: {nil, nil}, games: Map.new()}
-
-    
-
     {:ok, state}
   end
 

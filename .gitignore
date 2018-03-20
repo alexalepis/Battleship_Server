@@ -25,4 +25,3 @@ battleship_server-*.tar
 # ignore ./elixir_ls
 .elixir_ls
 
-/config/config.exs

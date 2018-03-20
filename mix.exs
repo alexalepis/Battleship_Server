@@ -14,7 +14,7 @@ defmodule BattleshipServer.MixProject do
   # Run "mix help compile.app" to learn about applications.
   def application do
     [
-      extra_applications: [:logger, :tds_ecto],
+      extra_applications: [:logger, :tds_ecto, :battleship_client],
       mod: {BattleshipServer.Application, []}
     ]
   end
@@ -23,6 +23,7 @@ defmodule BattleshipServer.MixProject do
   defp deps do
     [
       {:battleships, github: "alexalepis/Battleships"},
+      {:battleship_client, github: "ekousanakis/Battleship_Client"},
       {:tds_ecto, "~> 2.1"}
       # {:dep_from_hexpm, "~> 0.3.0"},
       # {:dep_from_git, git: "https://github.com/elixir-lang/my_dep.git", tag: "0.1.0"},
