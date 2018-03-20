@@ -14,7 +14,7 @@ defmodule BattleshipServer.MixProject do
   # Run "mix help compile.app" to learn about applications.
   def application do
     [
-      extra_applications: [:logger, :tds_ecto, :battleship_client],
+      extra_applications: [:logger, :tds_ecto],
       mod: {BattleshipServer.Application, []}
     ]
   end
