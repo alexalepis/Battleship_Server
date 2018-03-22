@@ -21,6 +21,8 @@ defmodule BattleshipServer.Store do
     {:noreply, nil}
   end
 
+  def handle_info({:basic_consume_ok, _}, _), do: {:noreply, nil}
+
   def wait_for_messages(channel) do
     IO.puts("Waiting for messages")
 
