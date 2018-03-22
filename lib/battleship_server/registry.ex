@@ -6,7 +6,13 @@ defmodule BattleshipServer.Registry do
   end
 
   def init(_) do
-    {:ok, _} = Registry.start_link(keys: :duplicate, name: Registry.BattleshipPubSub, partitions: System.schedulers_online)
+    {:ok, _} =
+      Registry.start_link(
+        keys: :duplicate,
+        name: Registry.BattleshipPubSub,
+        partitions: System.schedulers_online()
+      )
+
     {:ok, nil}
   end
 
@@ -15,12 +21,8 @@ defmodule BattleshipServer.Registry do
   end
 
   def dispatch(topic, message) do
-    Registry.dispatch(Registry.BattleshipPubSub, topic, 
-    fn entries -> for {pid, _} <- entries,
-    do: send(pid, message) 
+    Registry.dispatch(Registry.BattleshipPubSub, topic, fn entries ->
+      for {pid, _} <- entries, do: send(pid, message)
     end)
   end
-
-
-
 end
