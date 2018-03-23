@@ -8,7 +8,7 @@ defmodule Server.Supervisor do
   def init(_) do
     children = [
       Game.Server,
-      # BattleshipServer.Registry,
+      BattleshipServer.Rabbit,
       BattleshipServer.Store
     ]
 

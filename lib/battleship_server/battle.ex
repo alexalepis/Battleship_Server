@@ -45,19 +45,13 @@ defmodule Battle do
           {message, new_game.enemy_player.name}
         )
 
-        {:ok, connection} = AMQP.Connection.open()
-        {:ok, channel} = AMQP.Channel.open(connection)
-        AMQP.Exchange.declare(channel, "game_server", :topic)
-
         message =
           Poison.encode!(%{
             "Winner" => elem(new_game.enemy_player.name, 0),
             "game_id" => new_game.game_id
           })
 
-        AMQP.Basic.publish(channel, "game_server", "winner.store", message)
-
-        AMQP.Connection.close(connection)
+        BattleshipServer.Rabbit.pub("game_server", "winner.store", message)
 
       {:ok, _, :hit} ->
         Server.Protocol.send_to(

@@ -78,10 +78,6 @@ defmodule Game.Server do
         winner: nil
       }
 
-      {:ok, connection} = AMQP.Connection.open()
-      {:ok, channel} = AMQP.Channel.open(connection)
-      AMQP.Exchange.declare(channel, "game_server", :topic)
-
       message =
         Poison.encode!(%{
           "player_2" => elem(client_data, 0),
@@ -89,11 +85,7 @@ defmodule Game.Server do
           "game_id" => new_game_id
         })
 
-      AMQP.Basic.publish(channel, "game_server", "newgame.store", message)
-
-      AMQP.Connection.close(connection)
-
-      # BattleshipServer.Registry.dispatch("game_start_stop",  {:game_created, new_game_id, elem(state.wait_list, 0), elem(client_data, 0)})
+      BattleshipServer.Rabbit.pub("game_server", "newgame.store", message)
 
       state = %{state | wait_list: {nil, nil}, games: Map.put(state.games, new_game_id, new_game)}
       {:ok, new_game_pid, state}

@@ -12,7 +12,6 @@ defmodule BattleshipServer.Store do
     {:ok, %{queue: queue_name}} = AMQP.Queue.declare(channel, "", exclusive: true)
     AMQP.Queue.bind(channel, queue_name, "game_server", routing_key: "*.store")
     AMQP.Basic.consume(channel, queue_name, nil, no_ack: true)
-    GenServer.cast(self(), {:start, channel})
     {:ok, nil}
   end
 
