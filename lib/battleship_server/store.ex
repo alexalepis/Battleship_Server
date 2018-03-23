@@ -2,7 +2,7 @@ defmodule BattleshipServer.Store do
   use GenServer
 
   def start_link(_) do
-    GenServer.start_link(__MODULE__, nil)
+    GenServer.start_link(__MODULE__, nil,name: :store)
   end
 
   def init(_) do
@@ -15,28 +15,19 @@ defmodule BattleshipServer.Store do
     {:ok, nil}
   end
 
-  def handle_cast({:start, channel}, _state) do
-    wait_for_messages(channel)
-    {:noreply, nil}
-  end
-
   def handle_info({:basic_consume_ok, _}, _), do: {:noreply, nil}
 
-  def wait_for_messages(channel) do
-    IO.puts("Waiting for messages")
 
-    receive do
-      {:basic_deliver, payload, _meta} ->
-        case Poison.decode!(payload) do
-          %{"player_2" => pl2, "player_1" => pl1, "game_id" => game_id} ->
-            new_game(game_id, pl1, pl2)
+  def handle_info({:basic_deliver, payload, _meta}, _state) do
+    case Poison.decode!(payload) do
+      %{"player_2" => pl2, "player_1" => pl1, "game_id" => game_id} ->
+        new_game(game_id, pl1, pl2)
 
-          %{"Winner" => game_winner, "game_id" => game} ->
-            winner(game, game_winner)
-        end
-
-        wait_for_messages(channel)
+      %{"Winner" => game_winner, "game_id" => game} ->
+        winner(game, game_winner)
     end
+
+    {:noreply, nil}
   end
 
   def new_game(new_game_id, pl1, pl2) do
